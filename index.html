@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Antonio Garcia-Dominguez">
+  <meta name="dcterms.date" content="2022-03-03">
+  <title>Integrating the Eclipse Epsilon MDE toolkit into your programs</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="./reveal.js/dist/reset.css">
+  <link rel="stylesheet" href="./reveal.js/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+      }
+    pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+    div.sourceCode
+      { color: #cccccc; background-color: #303030; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ffcfaf; } /* Alert */
+    code span.an { color: #7f9f7f; font-weight: bold; } /* Annotation */
+    code span.at { } /* Attribute */
+    code span.bn { color: #dca3a3; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #f0dfaf; } /* ControlFlow */
+    code span.ch { color: #dca3a3; } /* Char */
+    code span.cn { color: #dca3a3; font-weight: bold; } /* Constant */
+    code span.co { color: #7f9f7f; } /* Comment */
+    code span.cv { color: #7f9f7f; font-weight: bold; } /* CommentVar */
+    code span.do { color: #7f9f7f; } /* Documentation */
+    code span.dt { color: #dfdfbf; } /* DataType */
+    code span.dv { color: #dcdccc; } /* DecVal */
+    code span.er { color: #c3bf9f; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #c0bed1; } /* Float */
+    code span.fu { color: #efef8f; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #7f9f7f; font-weight: bold; } /* Information */
+    code span.kw { color: #f0dfaf; } /* Keyword */
+    code span.op { color: #f0efd0; } /* Operator */
+    code span.ot { color: #efef8f; } /* Other */
+    code span.pp { color: #ffcfaf; font-weight: bold; } /* Preprocessor */
+    code span.sc { color: #dca3a3; } /* SpecialChar */
+    code span.ss { color: #cc9393; } /* SpecialString */
+    code span.st { color: #cc9393; } /* String */
+    code span.va { } /* Variable */
+    code span.vs { color: #cc9393; } /* VerbatimString */
+    code span.wa { color: #7f9f7f; font-weight: bold; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="./reveal.js/dist/theme/night.css" id="theme">
+  <link rel="stylesheet" href="slides.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+<script>mermaid.initialize({ startOnLoad: true, theme: "dark" });</script>
+  <div class="reveal">
+    <div class="slides">
+<div class="footer">
+  Integrating the Eclipse Epsilon MDE toolkit into your programs - Antonio García-Domínguez (Aston University) - <a href="https://twitter.com/antoniogado">@antoniogado</a> / a.garcia-dominguez AT aston DOT ac DOT uk
+</div>
+<section id="title-slide">
+  <h1 class="title">Integrating the Eclipse Epsilon MDE toolkit into your programs</h1>
+  <p class="author">Antonio Garcia-Dominguez</p>
+  <p class="date">March 3, 2022</p>
+</section>
+
+<section>
+<section id="introduction" class="title-slide slide level1">
+<h1>Introduction</h1>
+
+</section>
+<section id="who-am-i" class="slide level2">
+<h2>Who am I?</h2>
+<ul>
+<li>Lecturer in Computer Science at Aston University</li>
+<li>Committer in <a href="https://eclipse.org/epsilon">Eclipse Epsilon</a> since 2011</li>
+<li>Used Epsilon for several approaches:
+<ul>
+<li>Test design and generation</li>
+<li>Process-oriented website generation</li>
+<li>Self-adaptive system introspection</li>
+<li>Timetable optimisation and export/import</li>
+</ul></li>
+</ul>
+</section>
+<section id="session-outline" class="slide level2">
+<h2>Session outline</h2>
+<ol type="1">
+<li>Review of main concepts from last session</li>
+<li>Query and modify models with <code>EolModule</code></li>
+<li>Transform models with <code>EtlModule</code></li>
+<li>Generate text with <code>EglTemplateFactoryModuleAdapter</code></li>
+<li>(Optional) Extend Epsilon with our own Java code</li>
+</ol>
+</section>
+<section id="review-on-modeling-concepts" class="slide level2">
+<h2>Review on modeling concepts</h2>
+<ul>
+<li>MDE is about using <em>models</em> to develop our system: partial descriptions for a certain purpose</li>
+<li>A model is written in a <em>modeling language</em>, with formal syntax:
+<ul>
+<li>Abstract syntax: the concepts (e.g. <code>Class</code>)</li>
+<li>Concrete syntax: the notation (e.g. textual/graphical)</li>
+</ul></li>
+<li>Modeling languages may be “general purpose” (e.g. UML) or domain-specific</li>
+</ul>
+</section>
+<section id="review-on-eclipse-epsilon" class="slide level2 diagram-slide">
+<h2 class="diagram-slide">Review on Eclipse Epsilon</h2>
+<div>
+<span class="diagram-data" style="display: none;">
+graph TD
+    ECL["Model&lt;br/&gt;comparison&lt;br/&gt;(ECL)"]
+    Flock["Model&lt;br/&gt;migration&lt;br/&gt;(Flock)"]
+    EGL["Code&lt;br/&gt;generation&lt;br/&gt;(EGL)"]
+    EVL["Model&lt;br/&gt;validation&lt;br/&gt;(EVL)"]
+    EPL["Pattern&lt;br/&gt;Matching&lt;br/&gt;(EPL)"]
+    EML["Model&lt;br/&gt;Merging&lt;br/&gt;(EML)"]
+    ETL["M2M&lt;br/&gt;Transformation&lt;br/&gt;(ETL)"]
+    EOL["Epsilon Object Language (EOL)"]
+    ETL --&gt; |extends|EOL
+    EML --&gt; |uses for matching|ECL
+    EML --&gt; |extends|ETL
+    EPL --&gt; |extends|EOL
+    ECL --&gt; |extends|EOL
+    EGL --&gt; |preprocessed into|EOL
+    EVL --&gt; |extends|EOL
+    Flock --&gt; |extends|EOL
+    Pinset --&gt; |extends|EOL
+
+    EMC["Epsilon Model Connectivity (EMC)"]
+    EMF["Eclipse Modeling&lt;br/&gt; Framework (EMF)"]
+    Simulink["MATLAB&lt;br/&gt;Simulink"]
+    Excel["Excel&lt;br/&gt;Speadsheets"]
+    PTC["PTC Integrity&lt;br/&gt;Modeller"]
+    Dots["..."]
+
+    EOL --&gt;|accesses models through| EMC
+    EMC --- EMF
+    EMC --- Simulink
+    EMC --- XML
+    EMC --- Excel
+    EMC --- PTC
+    EMC --- CSV
+    EMC --- Dots
+</span>
+<div class="diagram-display" style="min-height: 700px;"></div>
+</div>
+</section>
+<section id="for-todays-session" class="slide level2 diagram-slide">
+<h2 class="diagram-slide">For today’s session</h2>
+<p>We will focus on this subset of Epsilon:</p>
+<div>
+<span class="diagram-data" style="display: none;">
+graph TD
+    EGL["Code&lt;br/&gt;generation&lt;br/&gt;(EGL)"]
+    ETL["M2M&lt;br/&gt;Transformation&lt;br/&gt;(ETL)"]
+    EOL["Epsilon Object Language (EOL)"]
+    ETL --&gt; |extends|EOL
+    EGL --&gt; |preprocessed into|EOL
+
+    EMC["Epsilon Model Connectivity (EMC)"]
+    EMF["Eclipse Modeling&lt;br/&gt; Framework (EMF)"]
+
+    EOL --&gt;|accesses models through| EMC
+    EMC --- EMF
+</span>
+<div class="diagram-display" style="min-height: 700px;"></div>
+</div>
+</section>
+<section id="environment-setup-with-gitpod.io" class="slide level2">
+<h2>Environment setup with Gitpod.io</h2>
+<ul>
+<li>In the previous session, we used the <a href="https://www.eclipse.org/epsilon/live/">Epsilon Playground</a> to introduce Epsilon</li>
+<li>Epsilon can also be used from the Eclipse IDE, or from its Ant/Maven/Gradle tasks</li>
+<li>This session will focus on invoking E*L scripts from Java code, using the Maven artifacts available from <a href="https://search.maven.org/search?q=g:org.eclipse.epsilon">Maven Central</a></li>
+<li>Rather than requiring the installation of Eclipse, we will use the Gitpod web-based IDE: open <a href="https://gitpod.io/#https://github.com/bluezio/mdenet-integration-sample">this link</a> and authenticate via GitHub.</li>
+</ul>
+</section>
+<section id="gitpod.io-authentication" class="slide level2">
+<h2>Gitpod.io: authentication</h2>
+<p><img data-src="img/gitpod-auth.png" /></p>
+</section>
+<section id="gitpod.io-main-page" class="slide level2">
+<h2>Gitpod.io: main page</h2>
+<figure>
+<img data-src="img/gitpod-main.png" alt="Gitpod uses a web-based version of VS Code." /><figcaption aria-hidden="true">Gitpod uses a web-based version of VS Code.</figcaption>
+</figure>
+</section>
+<section id="gitpod.io-first-time-check" class="slide level2">
+<h2>Gitpod.io: first-time check</h2>
+<p><img data-src="img/gitpod-rundebug.png" style="width:80.0%" /></p>
+<ul>
+<li>Try opening <code>NoModel.java</code> on the left</li>
+<li>If you do not see “Run | Debug”, reload the page</li>
+</ul>
+</section></section>
+<section>
+<section id="querying-models-with-eol-from-java" class="title-slide slide level1">
+<h1>Querying models with EOL from Java</h1>
+
+</section>
+<section id="project-structure" class="slide level2">
+<h2>Project structure</h2>
+<ul>
+<li>Standard Maven-based project (with a <code>pom.xml</code>)</li>
+<li>We use Java 11 sources, building for Java 11+</li>
+<li>We are using Epsilon 2.4.0 interims (<code>-SNAPSHOT</code>), to avoid a warning message when using EGL</li>
+<li>We use <code>&lt;dependencyManagement&gt;</code> to ensure we use modern Eclipse core JARs:
+<ul>
+<li>The Eclipse JARs in Maven Central use version range dependencies (mimicking Eclipse plugin semantics)</li>
+<li>These range-based dependencies can sometimes result in mismatched code signing certificates</li>
+</ul></li>
+</ul>
+</section>
+<section id="maven-dependency-eol" class="slide level2">
+<h2>Maven dependency: EOL</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">groupId</span>&gt;org.eclipse.epsilon&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">artifactId</span>&gt;org.eclipse.epsilon.eol.engine&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">version</span>&gt;${epsilon.version}&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">dependency</span>&gt;</span></code></pre></div>
+<ul>
+<li>Stable Epsilon JARs available from <a href="https://search.maven.org/search?q=g:org.eclipse.epsilon">Maven Central</a></li>
+<li>Interim Epsilon JARs available from <a href="https://oss.sonatype.org/#nexus-search;gav~org.eclipse.epsilon~~~~">Sonatype</a></li>
+<li>Artifact ID points to the EOL execution engine</li>
+<li>Maven <code>epsilon.version</code> property ensures the Epsilon JARs match each other</li>
+</ul>
+</section>
+<section id="eol-without-a-model-12" class="slide level2">
+<h2>EOL without a model (1/2)</h2>
+<ul>
+<li>Enter Ctrl+P and open <code>NoModel.java</code></li>
+<li>You will notice it follows three large steps:
+<ol type="1">
+<li>Create a new <code>EolModule</code></li>
+<li>Call <code>.parse()</code> while passing the reference to the script location: in this case, we package the script with our application, but it could be an external file</li>
+<li>Run <code>.execute()</code> to obtain the result (in case the last statement is a <code>return</code>)</li>
+</ol></li>
+<li>Try clicking on “Run” above <code>public static void main</code>, and watch the terminal</li>
+</ul>
+</section>
+<section id="eol-without-a-model-22" class="slide level2">
+<h2>EOL without a model (2/2)</h2>
+<p><img data-src="img/eol-nomodel.png" /></p>
+<ul>
+<li>No big surprises here :-)</li>
+<li>Ignore the <code>Picked up</code> part: it’s Gitpod-specific</li>
+<li>Obviously, we want to work on models: let’s do that next!</li>
+</ul>
+</section>
+<section id="eol-with-a-read-only-model" class="slide level2">
+<h2>EOL with a read-only model</h2>
+<ul>
+<li>Enter Ctrl + P and open <code>ReadOnlyModel.java</code></li>
+<li>There are quite a few more steps here:
+<ol type="1">
+<li>Configure EMF to support <a href="https://www.eclipse.org/epsilon/doc/flexmi">Flexmi</a> / <a href="https://www.eclipse.org/emfatic/">Emfatic</a> models</li>
+<li>Parse the EOL code (same as before)</li>
+<li>Set up an <code>EmfModel</code> and add it to the <em>model repository</em> of the <code>EolModule</code></li>
+<li>Run the EOL script</li>
+<li>Dispose all models in the model repository</li>
+</ol></li>
+</ul>
+</section>
+<section id="what-is-emfmodel" class="slide level2">
+<h2>What is EmfModel?</h2>
+<ul>
+<li><code>EmfModel</code> is an implementation of the <a href="https://www.eclipse.org/epsilon/doc/emc/">EMC</a> <code>IModel</code> interface</li>
+<li>It allows Epsilon to use <a href="https://www.eclipse.org/modeling/emf/">EMF</a>-based models</li>
+<li>Epsilon is otherwise independent from EMF: if you want to support a non-EMF model format, just provide your own <code>IModel</code> implementation</li>
+</ul>
+</section>
+<section id="new-dependency-emf-emc-driver" class="slide level2">
+<h2>New dependency: EMF EMC driver</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">groupId</span>&gt;org.eclipse.epsilon&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">artifactId</span>&gt;org.eclipse.epsilon.emc.emf&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">version</span>&gt;${epsilon.version}&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">dependency</span>&gt;</span></code></pre></div>
+<ul>
+<li>This Maven artifact provides <code>EmfModel</code></li>
+<li>By default, EMF only supports the XMI/XML model format</li>
+</ul>
+</section>
+<section id="new-dependency-flexmi" class="slide level2">
+<h2>New dependency: Flexmi</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">groupId</span>&gt;org.eclipse.epsilon&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">artifactId</span>&gt;org.eclipse.epsilon.flexmi&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">version</span>&gt;${epsilon.version}&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">dependency</span>&gt;</span></code></pre></div>
+<ul>
+<li>This library adds <code>.flexmi</code> support to EMF</li>
+</ul>
+</section>
+<section id="new-dependency-emfatic" class="slide level2">
+<h2>New dependency: Emfatic</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">groupId</span>&gt;org.eclipse.emfatic&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">artifactId</span>&gt;org.eclipse.emfatic.core&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">version</span>&gt;1.0.0&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">dependency</span>&gt;</span></code></pre></div>
+<ul>
+<li>This library adds <code>.emf</code> support to EMF</li>
+</ul>
+</section>
+<section id="telling-emf-about-flexmi-and-emfatic" class="slide level2">
+<h2>Telling EMF about Flexmi and Emfatic</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">final</span> var emap <span class="op">=</span> <span class="bu">Resource</span><span class="op">.</span><span class="fu">Factory</span><span class="op">.</span><span class="fu">Registry</span><span class="op">.</span><span class="fu">INSTANCE</span><span class="op">.</span><span class="fu">getExtensionToFactoryMap</span><span class="op">();</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>emap<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;flexmi&quot;</span><span class="op">,</span> <span class="kw">new</span> <span class="fu">FlexmiResourceFactory</span><span class="op">());</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>emap<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;emf&quot;</span><span class="op">,</span> <span class="kw">new</span> <span class="fu">EmfaticResourceFactory</span><span class="op">());</span></span></code></pre></div>
+<ul>
+<li>EMF can be told which parser (resource factory) to use based on the file extension</li>
+<li>In the above code, we are accessing the global registry and registering the <code>.flexmi</code> and <code>.emf</code> file extensions (on top of the default <code>.xmi</code> one)</li>
+</ul>
+</section>
+<section id="how-do-you-use-emfmodel" class="slide level2">
+<h2>How do you use EmfModel?</h2>
+<ol type="1">
+<li>Specify the metamodel with your modeling language’s concepts (here, it’s a file path)</li>
+<li>Specify the location of the model (also a file path)</li>
+<li>Decide if the specified location should be read when the model is loaded:
+<ul>
+<li><code>true</code> iff model is an input to the current task</li>
+</ul></li>
+<li>Decide if the model should be saved back to the file when the model is disposed:
+<ul>
+<li><code>true</code> iff model is an output of the current task</li>
+</ul></li>
+<li>Trigger the load with <code>m.load()</code></li>
+<li>Add it to the model repository of the module</li>
+</ol>
+</section>
+<section id="disposing-of-models" class="slide level2">
+<h2>Disposing of models</h2>
+<ul>
+<li>Since Java is garbage collected, simply having the <code>EolModule</code> variable go out of scope is not enough to free its resources (as in C++)</li>
+<li>Always remember to <code>dispose()</code> the model repository once a model is done running:
+<ol type="1">
+<li>Allows models to be GC’ed if no longer referenced</li>
+<li>Saves the models with <code>setStoredOnDisposal(true)</code></li>
+</ol></li>
+</ul>
+</section>
+<section id="test-readonlymodel" class="slide level2">
+<h2>Test ReadOnlyModel</h2>
+<p>Running <code>ReadOnlyModel</code> will produce the same output as in the Playground:</p>
+<p><img data-src="img/eol-readonlymodel.png" /></p>
+<ul>
+<li>Instead of printing a value, change the last statement to a <code>return</code></li>
+<li>Change your Java code to print the result</li>
+</ul>
+</section>
+<section id="writemodel-adding-a-task-13" class="slide level2">
+<h2>WriteModel: adding a task (1/3)</h2>
+<ul>
+<li>Now, create a copy of <code>ReadOnlyModel</code> called <code>WriteModel</code> that:
+<ul>
+<li>Runs <code>03-add_task.eol</code> instead</li>
+<li>Loads and saves <code>models/project.flexmi.xmi</code>
+<ul>
+<li>Note: saving is a no-op in Flexmi, hence we use XMI</li>
+</ul></li>
+</ul></li>
+<li>Try running the class again: what happened?</li>
+</ul>
+</section>
+<section id="writemodel-adding-a-task-23" class="slide level2">
+<h2>WriteModel: adding a task (2/3)</h2>
+<p><img data-src="img/eol-modeldiff.png" /></p>
+<ul>
+<li>The “diff” tells us a new task was added</li>
+<li>Duration is 10: the default value in the EOL code</li>
+<li>In a real application, our Java code may want to pass variables to the EOL script</li>
+</ul>
+</section>
+<section id="writemodel-adding-a-task-33" class="slide level2">
+<h2>WriteModel: adding a task (3/3)</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>eol<span class="op">.</span><span class="fu">getContext</span><span class="op">().</span><span class="fu">getFrameStack</span><span class="op">()</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>   <span class="op">.</span><span class="fu">put</span><span class="op">(</span>Variable<span class="op">.</span><span class="fu">createReadOnlyVariable</span><span class="op">(</span><span class="st">&quot;duration&quot;</span><span class="op">,</span> <span class="dv">42</span><span class="op">));</span></span></code></pre></div>
+<ul>
+<li>Add the above code before the <code>.execute()</code> call, importing <code>execute.context.Variable</code></li>
+<li>Rerun <code>WriteModel</code>: you should see a new task with the specified duration</li>
+<li>Epsilon organises variables into a stack of <em>frames</em>, with a frame for global variables, and additional frames for each nested operation call</li>
+</ul>
+</section></section>
+<section id="transforming-models-with-etl-from-java" class="title-slide slide level1">
+<h1>Transforming models with ETL from Java</h1>
+
+</section>
+
+<section id="generating-text-with-egl-from-java" class="title-slide slide level1">
+<h1>Generating text with EGL from Java</h1>
+
+</section>
+
+<section>
+<section id="conclusion" class="title-slide slide level1">
+<h1>Conclusion</h1>
+
+</section>
+<section id="session-recap" class="slide level2 overview">
+<h2 class="overview">Session recap</h2>
+</section>
+<section id="thank-you" class="slide level2">
+<h2>Thank you!</h2>
+<p>Antonio Garcia-Dominguez</p>
+<p>a.garcia-dominguez AT aston.ac.uk</p>
+<p><a href="http://twitter.com/antoniogado">@antoniogado</a></p>
+</section></section>
+    </div>
+  </div>
+
+  <script src="./reveal.js/dist/reveal.js"></script>
+  <script src="./reveal.js/plugin/mermaid/mermaid.js"></script>
+  <script src="./reveal.js/plugin/notes/notes.js"></script>
+  <script src="./reveal.js/plugin/search/search.js"></script>
+  <script src="./reveal.js/plugin/zoom/zoom.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+        // Push each slide change to the browser history
+        history: true,
+
+        // reveal.js plugins
+        plugins: [
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    </body>
+</html>

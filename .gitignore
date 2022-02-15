@@ -1,1 +1,5 @@
-*.html
+*.sh
+*.md
+custom.revealjs
+.github
+*.xml
