@@ -1,0 +1,33 @@
+.reveal h1 {
+  font-size: 2em;
+}
+
+.reveal h2 {
+  font-size: 1.25em;
+}
+
+.reveal li {
+  font-size: 1em;
+}
+
+.reveal li li {
+  font-size: .9em;
+}
+
+.reveal .footer {
+  position:  absolute;
+  bottom:  0em;
+  left:  0em;
+  font-size: 0.25em;
+}
+
+.reveal .column[data-align="center"] {
+  vertical-align: middle;
+}
+
+.reveal .overview img {
+  border: solid 1px;
+  margin:  .25em;
+  width: 35%;
+  padding: .25em;
+}
