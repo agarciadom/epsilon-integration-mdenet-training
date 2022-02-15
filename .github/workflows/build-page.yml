@@ -19,7 +19,7 @@ jobs:
   github-pages:
     runs-on: ubuntu-latest
     needs: [run-pandoc]
-    if: ${{ success() && github.ref == 'refs/heads/master' }}
+    if: ${{ success() && github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v2.3.5
         with:
@@ -27,9 +27,9 @@ jobs:
       - run: |
           git config --global user.name "Github Actions"
           git config --global user.email 'bluezio@users.noreply.github.com'
-          git fetch origin master
+          git fetch origin main
           rm -rf *
-          git checkout origin/master .
+          git checkout origin/main .
           git reset
           git checkout .gitignore
       - uses: actions/download-artifact@v2.0.10
