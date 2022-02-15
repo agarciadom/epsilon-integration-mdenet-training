@@ -94,7 +94,7 @@ $if(controlsTutorial)$
 $endif$
 $if(controlsLayout)$
         // Determines where controls appear, "edges" or "bottom-right"
-        controlsLayout: $controlsLayout$,
+        controlsLayout: '$controlsLayout$',
 $endif$
 $if(controlsBackArrows)$
         // Visibility rule for backwards navigation arrows; "faded", "hidden"
