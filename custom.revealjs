@@ -99,7 +99,7 @@ $endif$
 $if(controlsBackArrows)$
         // Visibility rule for backwards navigation arrows; "faded", "hidden"
         // or "visible"
-        controlsBackArrows: $controlsBackArrows$,
+        controlsBackArrows: '$controlsBackArrows$',
 $endif$
 $if(progress)$
         // Display a presentation progress bar
