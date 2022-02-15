@@ -1,5 +1,6 @@
 name: build-page
 on:
+  workflow_dispatch: {}
   push:
     paths-ignore:
       - 'README.md'
