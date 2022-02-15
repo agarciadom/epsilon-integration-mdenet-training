@@ -318,7 +318,7 @@ $if(zoomKey)$
 $endif$
 $if(display)$
         // The display mode that will be used to show slides
-        display: $display$,
+        display: '$display$',
 $endif$
 $if(mathjax)$
         math: {
