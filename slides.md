@@ -107,9 +107,9 @@ graph TD
 ## Environment setup with Gitpod.io
 
 * In the previous session, we used the [Epsilon Playground](https://www.eclipse.org/epsilon/live/) to introduce Epsilon
-* Epsilon can also be used from the Eclipse IDE, or from its Ant/Maven/Gradle tasks
 * This session will focus on invoking E\*L scripts from Java code, using the Maven artifacts available from [Maven Central](https://search.maven.org/search?q=g:org.eclipse.epsilon)
-* Rather than requiring the installation of Eclipse, we will use the Gitpod web-based IDE: open [this link](https://gitpod.io/#https://github.com/bluezio/mdenet-integration-sample) and authenticate via GitHub.
+* Epsilon can also be used from the Eclipse IDE, or from its Ant/Maven/Gradle tasks
+* To avoid having to set up an IDE, we will use Gitpod.io: open [this link](https://gitpod.io/#https://github.com/bluezio/mdenet-integration-sample) and authenticate via GitHub.
 
 ## Gitpod.io: authentication
 
@@ -123,7 +123,7 @@ graph TD
 
 ![](img/gitpod-rundebug.png){ width=80% }
 
-* Try opening `NoModel.java` on the left
+* Press Ctrl+P, type `NoModel` and press Enter
 * If you do not see "Run | Debug", reload the page
 
 # Querying models with EOL from Java
@@ -289,12 +289,135 @@ eol.getContext().getFrameStack()
 
 # Transforming models with ETL from Java
 
+## Code walkthrough
+
+* Enter Ctrl + P and open `Tree2Graph`
+* Uses ETL to transform a tree to a graph
+* It follows similar steps as for EOL:
+  1. Register the Flexmi/Emfatic parsers into EMF
+  1. Parse the ETL script
+  1. Create a source `EmfModel`
+  1. Create a target `EmfModel`
+  1. Execute the transformation
+  1. Dispose of the models
+
+## Model names and read/stored flags
+
+```java
+// Allows using Source!Tree to refer to the type
+source.setName("Source");
+// We only read from this model
+source.setReadOnLoad(true);
+source.setStoredOnDisposal(false);
+
+// Allows using Target!Graph
+target.setName("Target");
+// We only write to this model
+target.setReadOnLoad(false);
+target.setStoredOnDisposal(true);
+```
+
+## Notes about model repositories
+
+* A model repository can have as many models as we like, and we can mix EMF and non-EMF ones
+* ETL can transform one source element to one or more target elements
+* ETL can work with multiple input models
+
+## Obtaining traceability from ETL (1/4)
+
+* Run `Tree2Graph`, and open `models/graph.xmi`
+* We have a graph, but where did each node come from? We need *traceability* information!
+* Add this after `etl.execute()` inside the `try`:
+
+```java
+for (Transformation tx : etl.getContext().getTransformationTrace().getTransformations()) {
+  System.out.println(tx.getSource() + " produced " + tx.getTargets());
+}
+```
+
+## Obtaining traceability from ETL (2/4)
+
+Run `Tree2Graph` and you will get a list like this:
+
+```
+org.eclipse.emf.ecore.impl.DynamicEObjectImpl@576f63f6 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@3403e2ac (name: Tree) (instanceClassName: null) (abstract: false, interface: false)) produced [org.eclipse.emf.ecore.impl.DynamicEObjectImpl@13e547a9 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@40844aab (name: Graph) (instanceClassName: null) (abstract: false, interface: false))]
+org.eclipse.emf.ecore.impl.DynamicEObjectImpl@2dca0d64 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@3403e2ac (name: Tree) (instanceClassName: null) (abstract: false, interface: false)) produced [org.eclipse.emf.ecore.impl.DynamicEObjectImpl@3fb6cf60 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@447a020 (name: Node) (instanceClassName: null) (abstract: false, interface: false))]
+org.eclipse.emf.ecore.impl.DynamicEObjectImpl@5ef6ae06 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@3403e2ac (name: Tree) (instanceClassName: null) (abstract: false, interface: false)) produced [org.eclipse.emf.ecore.impl.DynamicEObjectImpl@37ddb69a (eClass: org.eclipse.emf.ecore.impl.EClassImpl@447a020 (name: Node) (instanceClassName: null) (abstract: false, interface: false))]
+org.eclipse.emf.ecore.impl.DynamicEObjectImpl@55dfebeb (eClass: org.eclipse.emf.ecore.impl.EClassImpl@3403e2ac (name: Tree) (instanceClassName: null) (abstract: false, interface: false)) produced [org.eclipse.emf.ecore.impl.DynamicEObjectImpl@349c1daf (eClass: org.eclipse.emf.ecore.impl.EClassImpl@447a020 (name: Node) (instanceClassName: null) (abstract: false, interface: false))]
+```
+
+Not particularly nice to look at...
+
+## Obtaining traceability from ETL (3/4)
+
+Change the code to this:
+
+```java
+for (Transformation tx : etl.getContext().getTransformationTrace().getTransformations()) {
+    EObject eob = (EObject) tx.getSource();
+    EStructuralFeature sfLabel = eob.eClass().getEStructuralFeature("label");
+    String label = (String) eob.eGet(sfLabel);
+
+    for (Object txTarget : tx.getTargets()) {
+        EObject eobTarget = (EObject) txTarget;
+        EStructuralFeature sfName = eobTarget.eClass().getEStructuralFeature("name");
+        String name = (String) eobTarget.eGet(sfName);
+        System.out.println("Tree " + label + " produced Node " + name);
+    }
+}
+```
+
+
+## Obtaining traceability from ETL (4/4)
+
+* New code is a bit cumbersome due to the use of a *dynamic* metamodel, loaded from a file rather than implemented in code (generated by EMF)
+* Dynamic metamodels require using EMF's generic `EObject` type
+* Run the new version to see the mappings:
+
+```
+Tree t1 produced Node t1
+Tree t2 produced Node t2
+Tree t3 produced Node t3
+Tree t4 produced Node t4
+```
+
 # Generating text with EGL from Java
+
+## Code walkthrough
+
+* Enter Ctrl + P and open `Project2Chart`
+* The steps should be quite familiar:
+  1. Register the Flexmi/Emfatic parsers into EMF
+  1. Parse the EGL script
+  1. Create a source `EmfModel`
+  1. Execute the script
+  1. Dispose of the models
+* Run it to obtain the `output.html` file
+
+## EGL module adapter
+
+* Internally, EGL works by generating an EOL file from your EGL script
+* `EglTemplateFactoryModuleAdapter` is an adapter over EGL's internal APIs that can be used in the same way as the `ExlModule` classes of the other Epsilon languages
+
+## Previewing the output
+
+* Open the `output.html` file in the root folder
+* Click the "Live Preview" button at the top right:
+
+![](img/live-preview.png)
+
+* You should be able to preview it as a webpage:
+
+![](img/live-preview-pane.png)
 
 # Conclusion
 
 ## Session recap { .overview }
 
+![](img/overview-1-refresher.png)
+![](img/overview-2-eol.png)
+![](img/overview-3-etl.png)
+![](img/overview-4-egl.png)
 
 ## Thank you!
 
@@ -303,3 +426,10 @@ Antonio Garcia-Dominguez
 a.garcia-dominguez AT aston.ac.uk
 
 [\@antoniogado](http://twitter.com/antoniogado)
+
+## Further discussion topics
+
+* [Calling Java from Epsilon](https://www.eclipse.org/epsilon/doc/articles/call-java-from-epsilon/)
+* [Calling native lambda expressions](https://www.eclipse.org/epsilon/doc/articles/lambda-expressions/)
+* [Developing a new EMC driver](https://www.eclipse.org/epsilon/doc/articles/developing-a-new-emc-driver/)
+* [Instrumenting Epsilon programs](https://www.eclipse.org/epsilon/doc/articles/monitoring-and-instrumenting-epsilon-programs/)
