@@ -207,9 +207,9 @@ graph TD
 <h2>Environment setup with Gitpod.io</h2>
 <ul>
 <li>In the previous session, we used the <a href="https://www.eclipse.org/epsilon/live/">Epsilon Playground</a> to introduce Epsilon</li>
-<li>Epsilon can also be used from the Eclipse IDE, or from its Ant/Maven/Gradle tasks</li>
 <li>This session will focus on invoking E*L scripts from Java code, using the Maven artifacts available from <a href="https://search.maven.org/search?q=g:org.eclipse.epsilon">Maven Central</a></li>
-<li>Rather than requiring the installation of Eclipse, we will use the Gitpod web-based IDE: open <a href="https://gitpod.io/#https://github.com/bluezio/mdenet-integration-sample">this link</a> and authenticate via GitHub.</li>
+<li>Epsilon can also be used from the Eclipse IDE, or from its Ant/Maven/Gradle tasks</li>
+<li>To avoid having to set up an IDE, we will use Gitpod.io: open <a href="https://gitpod.io/#https://github.com/bluezio/mdenet-integration-sample">this link</a> and authenticate via GitHub.</li>
 </ul>
 </section>
 <section id="gitpod.io-authentication" class="slide level2">
@@ -226,7 +226,7 @@ graph TD
 <h2>Gitpod.io: first-time check</h2>
 <p><img data-src="img/gitpod-rundebug.png" style="width:80.0%" /></p>
 <ul>
-<li>Try opening <code>NoModel.java</code> on the left</li>
+<li>Press Ctrl+P, type <code>NoModel</code> and press Enter</li>
 <li>If you do not see “Run | Debug”, reload the page</li>
 </ul>
 </section></section>
@@ -420,16 +420,136 @@ graph TD
 <li>Epsilon organises variables into a stack of <em>frames</em>, with a frame for global variables, and additional frames for each nested operation call</li>
 </ul>
 </section></section>
+<section>
 <section id="transforming-models-with-etl-from-java" class="title-slide slide level1">
 <h1>Transforming models with ETL from Java</h1>
 
 </section>
-
+<section id="code-walkthrough" class="slide level2">
+<h2>Code walkthrough</h2>
+<ul>
+<li>Enter Ctrl + P and open <code>Tree2Graph</code></li>
+<li>Uses ETL to transform a tree to a graph</li>
+<li>It follows similar steps as for EOL:
+<ol type="1">
+<li>Register the Flexmi/Emfatic parsers into EMF</li>
+<li>Parse the ETL script</li>
+<li>Create a source <code>EmfModel</code></li>
+<li>Create a target <code>EmfModel</code></li>
+<li>Execute the transformation</li>
+<li>Dispose of the models</li>
+</ol></li>
+</ul>
+</section>
+<section id="model-names-and-readstored-flags" class="slide level2">
+<h2>Model names and read/stored flags</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Allows using Source!Tree to refer to the type</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>source<span class="op">.</span><span class="fu">setName</span><span class="op">(</span><span class="st">&quot;Source&quot;</span><span class="op">);</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">// We only read from this model</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>source<span class="op">.</span><span class="fu">setReadOnLoad</span><span class="op">(</span><span class="kw">true</span><span class="op">);</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>source<span class="op">.</span><span class="fu">setStoredOnDisposal</span><span class="op">(</span><span class="kw">false</span><span class="op">);</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Allows using Target!Graph</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>target<span class="op">.</span><span class="fu">setName</span><span class="op">(</span><span class="st">&quot;Target&quot;</span><span class="op">);</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">// We only write to this model</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>target<span class="op">.</span><span class="fu">setReadOnLoad</span><span class="op">(</span><span class="kw">false</span><span class="op">);</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>target<span class="op">.</span><span class="fu">setStoredOnDisposal</span><span class="op">(</span><span class="kw">true</span><span class="op">);</span></span></code></pre></div>
+</section>
+<section id="notes-about-model-repositories" class="slide level2">
+<h2>Notes about model repositories</h2>
+<ul>
+<li>A model repository can have as many models as we like, and we can mix EMF and non-EMF ones</li>
+<li>ETL can transform one source element to one or more target elements</li>
+<li>ETL can work with multiple input models</li>
+</ul>
+</section>
+<section id="obtaining-traceability-from-etl-14" class="slide level2">
+<h2>Obtaining traceability from ETL (1/4)</h2>
+<ul>
+<li>Run <code>Tree2Graph</code>, and open <code>models/graph.xmi</code></li>
+<li>We have a graph, but where did each node come from? We need <em>traceability</em> information!</li>
+<li>Add this after <code>etl.execute()</code> inside the <code>try</code>:</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span>Transformation tx <span class="op">:</span> etl<span class="op">.</span><span class="fu">getContext</span><span class="op">().</span><span class="fu">getTransformationTrace</span><span class="op">().</span><span class="fu">getTransformations</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span>tx<span class="op">.</span><span class="fu">getSource</span><span class="op">()</span> <span class="op">+</span> <span class="st">&quot; produced &quot;</span> <span class="op">+</span> tx<span class="op">.</span><span class="fu">getTargets</span><span class="op">());</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="obtaining-traceability-from-etl-24" class="slide level2">
+<h2>Obtaining traceability from ETL (2/4)</h2>
+<p>Run <code>Tree2Graph</code> and you will get a list like this:</p>
+<pre><code>org.eclipse.emf.ecore.impl.DynamicEObjectImpl@576f63f6 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@3403e2ac (name: Tree) (instanceClassName: null) (abstract: false, interface: false)) produced [org.eclipse.emf.ecore.impl.DynamicEObjectImpl@13e547a9 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@40844aab (name: Graph) (instanceClassName: null) (abstract: false, interface: false))]
+org.eclipse.emf.ecore.impl.DynamicEObjectImpl@2dca0d64 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@3403e2ac (name: Tree) (instanceClassName: null) (abstract: false, interface: false)) produced [org.eclipse.emf.ecore.impl.DynamicEObjectImpl@3fb6cf60 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@447a020 (name: Node) (instanceClassName: null) (abstract: false, interface: false))]
+org.eclipse.emf.ecore.impl.DynamicEObjectImpl@5ef6ae06 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@3403e2ac (name: Tree) (instanceClassName: null) (abstract: false, interface: false)) produced [org.eclipse.emf.ecore.impl.DynamicEObjectImpl@37ddb69a (eClass: org.eclipse.emf.ecore.impl.EClassImpl@447a020 (name: Node) (instanceClassName: null) (abstract: false, interface: false))]
+org.eclipse.emf.ecore.impl.DynamicEObjectImpl@55dfebeb (eClass: org.eclipse.emf.ecore.impl.EClassImpl@3403e2ac (name: Tree) (instanceClassName: null) (abstract: false, interface: false)) produced [org.eclipse.emf.ecore.impl.DynamicEObjectImpl@349c1daf (eClass: org.eclipse.emf.ecore.impl.EClassImpl@447a020 (name: Node) (instanceClassName: null) (abstract: false, interface: false))]</code></pre>
+<p>Not particularly nice to look at…</p>
+</section>
+<section id="obtaining-traceability-from-etl-34" class="slide level2">
+<h2>Obtaining traceability from ETL (3/4)</h2>
+<p>Change the code to this:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span>Transformation tx <span class="op">:</span> etl<span class="op">.</span><span class="fu">getContext</span><span class="op">().</span><span class="fu">getTransformationTrace</span><span class="op">().</span><span class="fu">getTransformations</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    EObject eob <span class="op">=</span> <span class="op">(</span>EObject<span class="op">)</span> tx<span class="op">.</span><span class="fu">getSource</span><span class="op">();</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    EStructuralFeature sfLabel <span class="op">=</span> eob<span class="op">.</span><span class="fu">eClass</span><span class="op">().</span><span class="fu">getEStructuralFeature</span><span class="op">(</span><span class="st">&quot;label&quot;</span><span class="op">);</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> label <span class="op">=</span> <span class="op">(</span><span class="bu">String</span><span class="op">)</span> eob<span class="op">.</span><span class="fu">eGet</span><span class="op">(</span>sfLabel<span class="op">);</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="bu">Object</span> txTarget <span class="op">:</span> tx<span class="op">.</span><span class="fu">getTargets</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        EObject eobTarget <span class="op">=</span> <span class="op">(</span>EObject<span class="op">)</span> txTarget<span class="op">;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        EStructuralFeature sfName <span class="op">=</span> eobTarget<span class="op">.</span><span class="fu">eClass</span><span class="op">().</span><span class="fu">getEStructuralFeature</span><span class="op">(</span><span class="st">&quot;name&quot;</span><span class="op">);</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> name <span class="op">=</span> <span class="op">(</span><span class="bu">String</span><span class="op">)</span> eobTarget<span class="op">.</span><span class="fu">eGet</span><span class="op">(</span>sfName<span class="op">);</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Tree &quot;</span> <span class="op">+</span> label <span class="op">+</span> <span class="st">&quot; produced Node &quot;</span> <span class="op">+</span> name<span class="op">);</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</section>
+<section id="obtaining-traceability-from-etl-44" class="slide level2">
+<h2>Obtaining traceability from ETL (4/4)</h2>
+<ul>
+<li>New code is a bit cumbersome due to the use of a <em>dynamic</em> metamodel, loaded from a file rather than implemented in code (generated by EMF)</li>
+<li>Dynamic metamodels require using EMF’s generic <code>EObject</code> type</li>
+<li>Run the new version to see the mappings:</li>
+</ul>
+<pre><code>Tree t1 produced Node t1
+Tree t2 produced Node t2
+Tree t3 produced Node t3
+Tree t4 produced Node t4</code></pre>
+</section></section>
+<section>
 <section id="generating-text-with-egl-from-java" class="title-slide slide level1">
 <h1>Generating text with EGL from Java</h1>
 
 </section>
-
+<section id="code-walkthrough-1" class="slide level2">
+<h2>Code walkthrough</h2>
+<ul>
+<li>Enter Ctrl + P and open <code>Project2Chart</code></li>
+<li>The steps should be quite familiar:
+<ol type="1">
+<li>Register the Flexmi/Emfatic parsers into EMF</li>
+<li>Parse the EGL script</li>
+<li>Create a source <code>EmfModel</code></li>
+<li>Execute the script</li>
+<li>Dispose of the models</li>
+</ol></li>
+<li>Run it to obtain the <code>output.html</code> file</li>
+</ul>
+</section>
+<section id="egl-module-adapter" class="slide level2">
+<h2>EGL module adapter</h2>
+<ul>
+<li>Internally, EGL works by generating an EOL file from your EGL script</li>
+<li><code>EglTemplateFactoryModuleAdapter</code> is an adapter over EGL’s internal APIs that can be used in the same way as the <code>ExlModule</code> classes of the other Epsilon languages</li>
+</ul>
+</section>
+<section id="previewing-the-output" class="slide level2">
+<h2>Previewing the output</h2>
+<ul>
+<li>Open the <code>output.html</code> file in the root folder</li>
+<li>Click the “Live Preview” button at the top right:</li>
+</ul>
+<p><img data-src="img/live-preview.png" /></p>
+<ul>
+<li>You should be able to preview it as a webpage:</li>
+</ul>
+<p><img data-src="img/live-preview-pane.png" /></p>
+</section></section>
 <section>
 <section id="conclusion" class="title-slide slide level1">
 <h1>Conclusion</h1>
@@ -437,12 +557,22 @@ graph TD
 </section>
 <section id="session-recap" class="slide level2 overview">
 <h2 class="overview">Session recap</h2>
+<p><img data-src="img/overview-1-refresher.png" /> <img data-src="img/overview-2-eol.png" /> <img data-src="img/overview-3-etl.png" /> <img data-src="img/overview-4-egl.png" /></p>
 </section>
 <section id="thank-you" class="slide level2">
 <h2>Thank you!</h2>
 <p>Antonio Garcia-Dominguez</p>
 <p>a.garcia-dominguez AT aston.ac.uk</p>
 <p><a href="http://twitter.com/antoniogado">@antoniogado</a></p>
+</section>
+<section id="further-discussion-topics" class="slide level2">
+<h2>Further discussion topics</h2>
+<ul>
+<li><a href="https://www.eclipse.org/epsilon/doc/articles/call-java-from-epsilon/">Calling Java from Epsilon</a></li>
+<li><a href="https://www.eclipse.org/epsilon/doc/articles/lambda-expressions/">Calling native lambda expressions</a></li>
+<li><a href="https://www.eclipse.org/epsilon/doc/articles/developing-a-new-emc-driver/">Developing a new EMC driver</a></li>
+<li><a href="https://www.eclipse.org/epsilon/doc/articles/monitoring-and-instrumenting-epsilon-programs/">Instrumenting Epsilon programs</a></li>
+</ul>
 </section></section>
     </div>
   </div>
