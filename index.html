@@ -359,7 +359,7 @@ graph TD
 <ul>
 <li><code>true</code> iff model is an input to the current task</li>
 </ul></li>
-<li>Decide if the model should be saved back to the file when the model is disposed:
+<li>Decide if the model should be saved back when the model is disposed:
 <ul>
 <li><code>true</code> iff model is an output of the current task</li>
 </ul></li>
@@ -378,8 +378,8 @@ graph TD
 </ol></li>
 </ul>
 </section>
-<section id="test-readonlymodel" class="slide level2">
-<h2>Test ReadOnlyModel</h2>
+<section id="test-and-tweak-readonlymodel" class="slide level2">
+<h2>Test and tweak ReadOnlyModel</h2>
 <p>Running <code>ReadOnlyModel</code> will produce the same output as in the Playground:</p>
 <p><img data-src="img/eol-readonlymodel.png" /></p>
 <ul>
@@ -428,7 +428,7 @@ graph TD
 <section id="code-walkthrough" class="slide level2">
 <h2>Code walkthrough</h2>
 <ul>
-<li>Enter Ctrl + P and open <code>Tree2Graph</code></li>
+<li>Enter Ctrl + P and open <code>Tree2Graph.java</code></li>
 <li>Uses ETL to transform a tree to a graph</li>
 <li>It follows similar steps as for EOL:
 <ol type="1">
@@ -519,7 +519,7 @@ Tree t4 produced Node t4</code></pre>
 <section id="code-walkthrough-1" class="slide level2">
 <h2>Code walkthrough</h2>
 <ul>
-<li>Enter Ctrl + P and open <code>Project2Chart</code></li>
+<li>Enter Ctrl + P and open <code>Project2Chart.java</code></li>
 <li>The steps should be quite familiar:
 <ol type="1">
 <li>Register the Flexmi/Emfatic parsers into EMF</li>
