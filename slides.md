@@ -239,7 +239,7 @@ emap.put("emf", new EmfaticResourceFactory());
 1. Specify the location of the model (also a file path)
 1. Decide if the specified location should be read when the model is loaded:
    * `true` iff model is an input to the current task
-1. Decide if the model should be saved back to the file when the model is disposed:
+1. Decide if the model should be saved back when the model is disposed:
    * `true` iff model is an output of the current task
 1. Trigger the load with `m.load()`
 1. Add it to the model repository of the module
@@ -251,7 +251,7 @@ emap.put("emf", new EmfaticResourceFactory());
   1. Allows models to be GC'ed if no longer referenced
   1. Saves the models with `setStoredOnDisposal(true)`
 
-## Test ReadOnlyModel
+## Test and tweak ReadOnlyModel
 
 Running `ReadOnlyModel` will produce the same output as in the Playground:
 
@@ -291,7 +291,7 @@ eol.getContext().getFrameStack()
 
 ## Code walkthrough
 
-* Enter Ctrl + P and open `Tree2Graph`
+* Enter Ctrl + P and open `Tree2Graph.java`
 * Uses ETL to transform a tree to a graph
 * It follows similar steps as for EOL:
   1. Register the Flexmi/Emfatic parsers into EMF
@@ -385,7 +385,7 @@ Tree t4 produced Node t4
 
 ## Code walkthrough
 
-* Enter Ctrl + P and open `Project2Chart`
+* Enter Ctrl + P and open `Project2Chart.java`
 * The steps should be quite familiar:
   1. Register the Flexmi/Emfatic parsers into EMF
   1. Parse the EGL script
