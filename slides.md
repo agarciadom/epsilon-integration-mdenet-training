@@ -208,7 +208,7 @@ graph TD
 </dependency>
 ```
 
-* This library adds `.flexmi` support to EMF
+* Allows Epsilon to read Flexmi models
 
 ## New dependency: Emfatic
 
@@ -220,7 +220,7 @@ graph TD
 </dependency>
 ```
 
-* This library adds `.emf` support to EMF
+* Allows Epsilon to read EMF metamodels in the Emfatic language
 
 ## Telling EMF about Flexmi and Emfatic
 
