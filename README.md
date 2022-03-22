@@ -2,7 +2,7 @@
 
 These are the slides for the second Epsilon training event in the [MDE-Net EPSRC expert network](https://www.mde-network.org/).
 
-The latest build of the slides can be browsed online from [here](https://bluezio.github.io/epsilon-integration-mdenet-training/).
+The latest build of the slides can be browsed online from [here](https://agarciadom.github.io/epsilon-integration-mdenet-training/).
 
 ## Prerequisites
 
